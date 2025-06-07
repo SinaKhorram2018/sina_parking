@@ -6,15 +6,7 @@ Config.set('graphics', 'height', '580')  # ارتفاع پنجره برنامه 
 Config.set('graphics', 'resizable', '1')  # امکان تغییر اندازه پنجره فعال است
 
 # ----------------------------------------------------------------------
-import arabic_reshaper
-from bidi.algorithm import get_display
 
-def fix_text(text):
-    """تبدیل متن فارسی به فرم درست برای نمایش در Kivy"""
-    reshaped_text = arabic_reshaper.reshape(text)  # اصلاح شکل حروف
-    return get_display(reshaped_text)  # مرتب کردن جهت متن راست به چپ
-
-# --------------------------------------------------------------------------
 from kivy.core.text import LabelBase
 
 # ثبت فونت فارسی
@@ -177,40 +169,7 @@ class MainWindow(FloatLayout):
 
     def search(self):
         # گرفتن مقدار پلاک از ورودی
-        plate = self.ids.tin_plate.text.strip()
-        if not plate:
-            self.ids.lbl_print.text = "Please enter the license plate!"
-            return
-
-        try:
-            # جستجوی اطلاعات پلاک در جدول 
-            conn = sqlite3.connect("00.parking.dp")
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM user WHERE plate=?", (plate,))
-            result_user = cursor.fetchone()
-
-            if not result_user:
-                self.ids.lbl_print.text = "License plate not found!"
-                return
-
-            # جستجوی تمام تاریخ‌های مرتبط با پلاک در جدول date
-            conn = sqlite3.connect("00.parking.dp")
-            cursor = conn.cursor()
-            cursor.execute("SELECT date FROM date WHERE plate=?", (plate,))
-            results_date = cursor.fetchall()
-
-            if results_date:
-                dates = "\n".join([f"date: {row[0]}" for row in results_date])
-                self.ids.lbl_print.text = f"car: {result_user[1]}, plate: {result_user[0]}\n{dates}"
-            else:
-                self.ids.lbl_print.text = "No date has been recorded for this license plate!"
-
-        except Exception as e:
-            self.ids.lbl_print.text = f"error: {str(e)}"
-
-        finally:
-            if 'conn_user' in locals():
-                conn.close()
+        pass
 
 
 
@@ -220,9 +179,6 @@ class parking(App):
     def build(self):
         return MainWindow()
 
-    def fix_text(self, text):
-        """تابع را به Kivy معرفی می‌کنیم"""
-        return fix_text(text)
 
 
 if __name__ == "__main__":
