@@ -1,0 +1,100 @@
+<MainWindow>:
+    FloatLayout:
+        size: root.width, root.height
+        padding: ('07dp', '07dp', '07dp', '07dp')
+
+        Label:
+            text: app.fix_text("Sina parking")
+            font_name: "fs"
+            font_size: 23
+            pos_hint: {"top": 0.99, "center_x": 0.5}
+            size_hint: 1, 0.1
+
+# ========== برای مدیریت ظاهر تکس اینپوت ها ===============================
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: '10dp'
+            size_hint: 0.8, 0.31
+            pos_hint: {'x': 0.1, 'y': 0.57}
+
+            TextInput:
+                id: tin_plate
+                hint_text: "plate (abc-1234)"
+                font_name: "fs"
+                font_size: 12
+                multiline: False
+                on_text:
+                    if len(self.text) > 8: self.text = self.text[:8]
+
+            TextInput:
+                id: tin_car
+                hint_text: "car..."
+                font_name: "fs"
+                font_size: 12
+                multiline: False
+
+            TextInput:
+                id: tin_date
+                hint_text: "date (YYYY-MM-DD)"
+                font_name: "fs"
+                font_size: 12
+                multiline: False
+                on_text:
+                    if len(self.text) > 12: self.text = self.text[:12]
+
+            TextInput:
+                id: tin_login
+                hint_text: "login (00:00)"
+                font_name: "fs"
+                font_size: 12
+                multiline: False
+                on_text:
+                    if len(self.text) > 5: self.text = self.text[:5]
+
+            TextInput:
+                id: tin_exit
+                hint_text: "exit (00:00)"
+                font_name: "fs"
+                font_size: 12
+                multiline: False
+                on_text:
+                    if len(self.text) > 5: self.text = self.text[:5]
+
+# ======== برای مدیریت سایز دکمه ها ===============================================
+        BoxLayout:
+            orientation: 'horizontal'
+            spacing: '10dp'
+            padding: ('20dp', '05dp', '20dp', '05dp')
+            size_hint: 1, 0.4
+            pos_hint: {'x': 0 , 'y': 0.49 }
+
+            Button:
+                text: "save"
+                font_name: "fs"
+                size_hint: 0.3, 0.1
+                on_press: root.save()
+
+            Button:
+                text: "search"
+                font_name: "fs"
+                size_hint: 0.3, 0.1
+                on_press: root.search()
+
+
+        Label:
+            id: lbl_print1
+            text: ""
+            font_name: "fs"
+            font_size: 12
+            pos_hint: {"center_x": 0.5, "top": 0.5}
+            size_hint: 1, 0.1
+            color: 1, 0, 0, 1  # رنگ قرمز برای پیام‌ها
+
+        Label:
+            id: lbl_print2
+            text: ""
+            font_name: "fs"
+            font_size: 12
+            pos_hint: {"center_x": 0.5, "top": 0.4}
+            size_hint: 1, 0.1
+            color: 1, 0, 0, 1  # رنگ قرمز برای پیام‌ها
