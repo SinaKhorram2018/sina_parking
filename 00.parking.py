@@ -5,7 +5,9 @@ Config.set('graphics', 'width', '290')  # عرض پنجره برنامه به 29
 Config.set('graphics', 'height', '580')  # ارتفاع پنجره برنامه به 580 پیکسل
 Config.set('graphics', 'resizable', '1')  # امکان تغییر اندازه پنجره فعال است
 
+
 # --------------------------------------------------------------------------
+
 from kivy.core.text import LabelBase
 
 # ثبت فونت فارسی
@@ -137,8 +139,6 @@ class MainWindow(FloatLayout):
                     return
 
 
-# ???????????????????????????????????????????????????????????????????????
-# پلاک جدید در روز ثبت شده ارور داره و در روز جدید داخله
             # بررسی وجود ورود در جدول date
             cursor.execute("SELECT login FROM date WHERE login=?", (login,))
             result_login = cursor.fetchone()
@@ -212,40 +212,7 @@ class MainWindow(FloatLayout):
 
     def search(self):
         # گرفتن مقدار پلاک از ورودی
-        plate = self.ids.tin_plate.text.strip()
-        if not plate:
-            self.ids.lbl_print.text = "Please enter the license plate!"
-            return
-
-        try:
-            # جستجوی اطلاعات پلاک در جدول 
-            conn = sqlite3.connect("00.parking.dp")
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM user WHERE plate=?", (plate,))
-            result_user = cursor.fetchone()
-
-            if not result_user:
-                self.ids.lbl_print.text = "License plate not found!"
-                return
-
-            # جستجوی تمام تاریخ‌های مرتبط با پلاک در جدول date
-            conn = sqlite3.connect("00.parking.dp")
-            cursor = conn.cursor()
-            cursor.execute("SELECT date FROM date WHERE plate=?", (plate,))
-            results_date = cursor.fetchall()
-
-            if results_date:
-                dates = "\n".join([f"date: {row[0]}" for row in results_date])
-                self.ids.lbl_print.text = f"car: {result_user[1]}, plate: {result_user[0]}\n{dates}"
-            else:
-                self.ids.lbl_print.text = "No date has been recorded for this license plate!"
-
-        except Exception as e:
-            self.ids.lbl_print.text = f"error: {str(e)}"
-
-        finally:
-            if 'conn_user' in locals():
-                conn.close()
+        pass
 
 
 
