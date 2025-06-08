@@ -5,15 +5,6 @@ Config.set('graphics', 'width', '290')  # عرض پنجره برنامه به 29
 Config.set('graphics', 'height', '580')  # ارتفاع پنجره برنامه به 580 پیکسل
 Config.set('graphics', 'resizable', '1')  # امکان تغییر اندازه پنجره فعال است
 
-# ----------------------------------------------------------------------
-import arabic_reshaper
-from bidi.algorithm import get_display
-
-def fix_text(text):
-    """تبدیل متن فارسی به فرم درست برای نمایش در Kivy"""
-    reshaped_text = arabic_reshaper.reshape(text)  # اصلاح شکل حروف
-    return get_display(reshaped_text)  # مرتب کردن جهت متن راست به چپ
-
 # --------------------------------------------------------------------------
 from kivy.core.text import LabelBase
 
@@ -65,30 +56,36 @@ class MainWindow(FloatLayout):
         # بررسی اعتبار ورودی‌ها
         if not car or not plate or not date or not login or not logout:
             self.ids.lbl_print1.text = "Please fill in all fields!"
+            self.ids.lbl_print2.text = ""
             return
         
         # اعتبارسنجی پلاک
         if len(plate) != 8 or plate.count('-') != 1:
             self.ids.lbl_print1.text = "The plate format is incorrect!\n      (Example:abc-1234)"
+            self.ids.lbl_print2.text = ""
             return
 
         # اعتبارسنجی تاریخ
         if len(date) != 10 or date.count('-') != 2:
             self.ids.lbl_print1.text = "The date format is incorrect!\n    (Example:2025-01-01)"
+            self.ids.lbl_print2.text = ""
             return
         
         # اعتبارسنجی ورود
         if len(login) != 5 or login.count(':') != 1:
             self.ids.lbl_print1.text = "The login format is incorrect!\n       (Example:00:00)"
+            self.ids.lbl_print2.text = ""
             return
 
         # اعتبارسنجی خروج
         if len(logout) != 5 or logout.count(':') != 1:
             self.ids.lbl_print1.text = "The exit format is incorrect!\n      (Example:00:00)"
+            self.ids.lbl_print2.text = ""
             return
         # درستی ورود نسبت به خروج 
         if login >= logout:
             self.ids.lbl_print1.text = "Enter the input correctly!"
+            self.ids.lbl_print2.text = ""
             return
     
         try:
@@ -97,8 +94,9 @@ class MainWindow(FloatLayout):
             cursor = conn.cursor()
 
             # بررسی وجود پلاک در جدول user
-            cursor.execute("SELECT * FROM user WHERE plate=?", (plate,))
+            cursor.execute("SELECT plate FROM user WHERE plate=?", (plate,))
             result_plak = cursor.fetchone()
+            
             
             if not result_plak: # اگر پلاک وجود نداشت، آن را در جدول user ثبت کن
                 cursor.execute("INSERT INTO user (plate, car) VALUES (?, ?)", (plate, car))
@@ -110,53 +108,90 @@ class MainWindow(FloatLayout):
                 # return
                 
 
-# ???????????????????????????????????????????????????????????            
-            #  برسی دور نزدن 
-            cursor.execute("SELECT * FROM date WHERE date=?", (date,))
-            result = cursor.fetchall()
-            print(f"{result}")
-            
-            result_date = result[-3]
-            result_logout = result[-1]
-            
-            print(f"{result_date}")
-            print(f"{result_logout}")
-                        
-            if result_date == date and result_logout >= login: # اگر تاریخ بود و خروجی کوچبک یا مساوی ورودی بود 
-                self.ids.lbl_print1.text = "mano dor nazan"
-                return
-            
+            #  برسی اینکه این ماشین قبل از ساعت خروجش نمیتوانه ورودی داشته باشه
+            if result_plak:  # فقط اگر پلاک وجود داشته باشد
+                r_plate = result_plak[0]
+                
+                # بررسی تاریخ
+                cursor.execute("SELECT date FROM date WHERE date=?", (date,))
+                result_date = cursor.fetchone()
+                
+                # بررسی آخرین زمان خروج برای همین پلاک
+                cursor.execute("SELECT logout FROM date WHERE plate=? ORDER BY logout DESC LIMIT 1", (plate,))
+                result_logout = cursor.fetchone()
+                
+                if result_date:
+                    r_date = result_date[0]
+                else:
+                    r_date = None
+                    
+                if result_logout:
+                    r_logout = result_logout[0]
+                else:
+                    r_logout = None
 
-# ??????????????????????????????????????????????????????????????????
+                # حالا مقایسه کن
+                if r_plate == plate and r_date == date and r_logout >= login:
+                    self.ids.lbl_print1.text = "This car cannot enter before\n     its departure time."
+                    self.ids.lbl_print2.text = ""
+                    return
 
-            
+
+# ???????????????????????????????????????????????????????????????????????
+# پلاک جدید در روز ثبت شده ارور داره و در روز جدید داخله
             # بررسی وجود ورود در جدول date
-            cursor.execute("SELECT * FROM date WHERE login=?", (login,))
+            cursor.execute("SELECT login FROM date WHERE login=?", (login,))
             result_login = cursor.fetchone()
             
-            if result_plak and not result_login:  # اگر پلاک بود و ورود وجود نداشت، آن را در جدول date ثبت کن
+            # بررسی تاریخ
+            cursor.execute("SELECT date FROM date WHERE date=?", (date,))
+            result_date = cursor.fetchone()
+            
+            if result_date and result_plak and not result_login:  # اگر پلاک بود و ورود وجود نداشت، آن را در جدول date ثبت کن
                 cursor.execute("INSERT INTO date (plate, date, login, logout) VALUES (?, ?, ?, ?)", (plate, date, login, logout))
                 conn.commit()
                 # نمایش پیغام موفقیت
                 self.ids.lbl_print2.text = "Information saved successfully!"
             
-            elif not result_plak and result_login:  # اگر پلاک نبود و ورود وجود داشت، آن را در جدول date ثبت کن
+            elif result_date and not result_plak and result_login:  # اگر پلاک نبود و ورود وجود داشت، آن را در جدول date ثبت کن
                 cursor.execute("INSERT INTO date (plate, date, login, logout) VALUES (?, ?, ?, ?)", (plate, date, login, logout))
                 conn.commit()
                 # نمایش پیغام موفقیت
                 self.ids.lbl_print2.text = "Information saved successfully!"
             
-            elif not result_plak and not result_login:  # اگر پلاک نبود و ورود وجود نداشت، آن را در جدول date ثبت کن
+            elif result_date and not result_plak and not result_login:  # اگر پلاک نبود و ورود وجود نداشت، آن را در جدول date ثبت کن
+                cursor.execute("INSERT INTO date (plate, date, login, logout) VALUES (?, ?, ?, ?)", (plate, date, login, logout))
+                conn.commit()
+                # نمایش پیغام موفقیت
+                self.ids.lbl_print2.text = "Information saved successfully!"  
+             
+            elif not result_date and result_plak and result_login:  # اگر پلاک نبود و ورود وجود نداشت، آن را در جدول date ثبت کن
+                cursor.execute("INSERT INTO date (plate, date, login, logout) VALUES (?, ?, ?, ?)", (plate, date, login, logout))
+                conn.commit()
+                # نمایش پیغام موفقیت
+                self.ids.lbl_print2.text = "Information saved successfully!" 
+            
+            elif not result_date and not result_plak and result_login:  # اگر پلاک نبود و ورود وجود نداشت، آن را در جدول date ثبت کن
+                cursor.execute("INSERT INTO date (plate, date, login, logout) VALUES (?, ?, ?, ?)", (plate, date, login, logout))
+                conn.commit()
+                # نمایش پیغام موفقیت
+                self.ids.lbl_print2.text = "Information saved successfully!"     
+                
+            elif not result_date and result_plak and not result_login:  # اگر پلاک نبود و ورود وجود نداشت، آن را در جدول date ثبت کن
                 cursor.execute("INSERT INTO date (plate, date, login, logout) VALUES (?, ?, ?, ?)", (plate, date, login, logout))
                 conn.commit()
                 # نمایش پیغام موفقیت
                 self.ids.lbl_print2.text = "Information saved successfully!"  
                  
+            elif not result_date and not result_plak and not result_login:  # اگر پلاک نبود و ورود وجود نداشت، آن را در جدول date ثبت کن
+                cursor.execute("INSERT INTO date (plate, date, login, logout) VALUES (?, ?, ?, ?)", (plate, date, login, logout))
+                conn.commit()
+                # نمایش پیغام موفقیت
+                self.ids.lbl_print2.text = "Information saved successfully!" 
+                   
             else:
                 self.ids.lbl_print2.text = "This car is in the parking lot!"
                 return   
-            
-                        
 
         except sqlite3.IntegrityError:
             # اگر پلاک تکراری باشد (در جدول user)
@@ -177,42 +212,7 @@ class MainWindow(FloatLayout):
 
     def search(self):
         # گرفتن مقدار پلاک از ورودی
-        plate = self.ids.tin_plate.text.strip()
-        if not plate:
-            self.ids.lbl_print.text = "Please enter the license plate!"
-            return
-
-        try:
-            # جستجوی اطلاعات پلاک در جدول 
-            conn = sqlite3.connect("00.parking.dp")
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM user WHERE plate=?", (plate,))
-            result_user = cursor.fetchone()
-
-            if not result_user:
-                self.ids.lbl_print.text = "License plate not found!"
-                return
-
-            # جستجوی تمام تاریخ‌های مرتبط با پلاک در جدول date
-            conn = sqlite3.connect("00.parking.dp")
-            cursor = conn.cursor()
-            cursor.execute("SELECT date FROM date WHERE plate=?", (plate,))
-            results_date = cursor.fetchall()
-
-            if results_date:
-                dates = "\n".join([f"date: {row[0]}" for row in results_date])
-                self.ids.lbl_print.text = f"car: {result_user[1]}, plate: {result_user[0]}\n{dates}"
-            else:
-                self.ids.lbl_print.text = "No date has been recorded for this license plate!"
-
-        except Exception as e:
-            self.ids.lbl_print.text = f"error: {str(e)}"
-
-        finally:
-            if 'conn_user' in locals():
-                conn.close()
-
-
+        pass
 
 
 
@@ -220,9 +220,6 @@ class parking(App):
     def build(self):
         return MainWindow()
 
-    def fix_text(self, text):
-        """تابع را به Kivy معرفی می‌کنیم"""
-        return fix_text(text)
 
 
 if __name__ == "__main__":

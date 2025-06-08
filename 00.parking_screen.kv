@@ -4,7 +4,7 @@
         padding: ('07dp', '07dp', '07dp', '07dp')
 
         Label:
-            text: app.fix_text("Sina parking")
+            text: "Sina parking"
             font_name: "fs"
             font_size: 23
             pos_hint: {"top": 0.99, "center_x": 0.5}
@@ -40,7 +40,7 @@
                 font_size: 12
                 multiline: False
                 on_text:
-                    if len(self.text) > 12: self.text = self.text[:12]
+                    if len(self.text) > 10: self.text = self.text[:10]
 
             TextInput:
                 id: tin_login
