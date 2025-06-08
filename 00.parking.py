@@ -5,12 +5,9 @@ Config.set('graphics', 'width', '290')  # عرض پنجره برنامه به 29
 Config.set('graphics', 'height', '580')  # ارتفاع پنجره برنامه به 580 پیکسل
 Config.set('graphics', 'resizable', '1')  # امکان تغییر اندازه پنجره فعال است
 
-<<<<<<< HEAD
-# --------------------------------------------------------------------------
-=======
+
 # ----------------------------------------------------------------------
 
->>>>>>> 35ba1a06ea2578285525e493cd33d3b4dcc76e90
 from kivy.core.text import LabelBase
 
 # ثبت فونت فارسی
@@ -142,8 +139,6 @@ class MainWindow(FloatLayout):
                     return
 
 
-# ???????????????????????????????????????????????????????????????????????
-# پلاک جدید در روز ثبت شده ارور داره و در روز جدید داخله
             # بررسی وجود ورود در جدول date
             cursor.execute("SELECT login FROM date WHERE login=?", (login,))
             result_login = cursor.fetchone()
@@ -218,11 +213,6 @@ class MainWindow(FloatLayout):
     def search(self):
         # گرفتن مقدار پلاک از ورودی
         pass
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 35ba1a06ea2578285525e493cd33d3b4dcc76e90
 
 
 
