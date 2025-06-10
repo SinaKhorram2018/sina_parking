@@ -145,7 +145,6 @@ class MainWindow(FloatLayout):
                     self.ids.lbl_print2.text = ""
                     return
 
-
             # بررسی اینکه آیا برای این تاریخ قبلاً ورودی ثبت شده؟
             cursor.execute("SELECT * FROM date WHERE plate=? AND date=?", (plate, date))
             existing_record = cursor.fetchone()
@@ -172,7 +171,6 @@ class MainWindow(FloatLayout):
                 except:
                     pass
             
-
 
 # ===============================================================
 
@@ -219,7 +217,6 @@ class MainWindow(FloatLayout):
         finally:
             if 'conn_user' in locals():
                 conn.close()
-
 
 
 class parking(App):
