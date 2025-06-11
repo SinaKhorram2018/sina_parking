@@ -7,7 +7,6 @@ Config.set('graphics', 'resizable', '1')  # امکان تغییر اندازه �
 
 # --------------------------------------------------------------------------
 from kivy.core.text import LabelBase
-
 # ثبت فونت فارسی
 LabelBase.register(name="fs", fn_regular="FiraCode-SemiBold.ttf")
 
@@ -26,7 +25,6 @@ from datetime import datetime  # برای مقایسه زمان و تاریخ
 Builder.load_file("00.parking_screen.kv")
 
 # ------------------------------------------------------------------------------------
-
 # اتصال به دیتابیس و ایجاد جداول
 conn = sqlite3.connect("00.parking.dp")
 cursor = conn.cursor()
