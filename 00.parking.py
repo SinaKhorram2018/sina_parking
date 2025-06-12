@@ -168,7 +168,6 @@ class MainWindow(FloatLayout):
                     conn.close()
                 except:
                     pass
-            
 
 # ===============================================================
 
@@ -185,8 +184,6 @@ class MainWindow(FloatLayout):
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM user WHERE plate=?", (plate,))
             result_user = cursor.fetchone()
-            
-            #print(f"{result_user}")
 
             if not result_user:
                 self.ids.lbl_print1.text = "License plate not found!"
@@ -199,8 +196,7 @@ class MainWindow(FloatLayout):
             cursor.execute("SELECT * FROM date WHERE plate=?", (plate,))
             results_date = cursor.fetchall()
             
-            #print(f"{results_date}")
-
+  
             if results_date:
                 dates = "\n".join([f"date: {row[2:5]}" for row in results_date])
                 self.ids.lbl_print1.text = f"car: {result_user[1]}, plate: {result_user[0]}"
@@ -220,8 +216,6 @@ class MainWindow(FloatLayout):
 class parking(App):
     def build(self):
         return MainWindow()
-
-
 
 if __name__ == "__main__":
     parking().run()
