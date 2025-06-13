@@ -7,6 +7,7 @@ Config.set('graphics', 'resizable', '1')  # امکان تغییر اندازه �
 
 # --------------------------------------------------------------------------
 from kivy.core.text import LabelBase
+
 # ثبت فونت فارسی
 LabelBase.register(name="fs", fn_regular="FiraCode-SemiBold.ttf")
 
@@ -25,6 +26,7 @@ from datetime import datetime  # برای مقایسه زمان و تاریخ
 Builder.load_file("00.parking_screen.kv")
 
 # ------------------------------------------------------------------------------------
+
 # اتصال به دیتابیس و ایجاد جداول
 conn = sqlite3.connect("00.parking.dp")
 cursor = conn.cursor()
@@ -132,6 +134,7 @@ class MainWindow(FloatLayout):
                 
             if last_record:
                 db_date, db_logout = last_record
+                
                 try:
                     db_logout_dt = datetime.strptime(db_logout, "%H:%M")
                 except ValueError:
@@ -139,9 +142,10 @@ class MainWindow(FloatLayout):
 
                 # مقایسه تاریخ و زمان
                 if db_date == date and db_logout_dt and login_dt < db_logout_dt:
-                    self.ids.lbl_print1.text = "This car cannot enter before\nits exit time."
+                    self.ids.lbl_print1.text = "This car cannot enter before\n     its exit time."
                     self.ids.lbl_print2.text = ""
                     return
+
 
             # بررسی اینکه آیا برای این تاریخ قبلاً ورودی ثبت شده؟
             cursor.execute("SELECT * FROM date WHERE plate=? AND date=?", (plate, date))
@@ -150,7 +154,7 @@ class MainWindow(FloatLayout):
             
             # اگر هنوز وجود نداره، ثبت کن
             if existing_record:
-                self.ids.lbl_print2.text = "This car already has a record \nfor this date!"
+                self.ids.lbl_print2.text = "This car already has a record \n     for this date!"
                 return
 
             cursor.execute("INSERT INTO date (plate, date, login, logout) VALUES (?, ?, ?, ?)",
@@ -184,6 +188,8 @@ class MainWindow(FloatLayout):
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM user WHERE plate=?", (plate,))
             result_user = cursor.fetchone()
+            
+            #print(f"{result_user}")
 
             if not result_user:
                 self.ids.lbl_print1.text = "License plate not found!"
@@ -196,7 +202,8 @@ class MainWindow(FloatLayout):
             cursor.execute("SELECT * FROM date WHERE plate=?", (plate,))
             results_date = cursor.fetchall()
             
-  
+            #print(f"{results_date}")
+
             if results_date:
                 dates = "\n".join([f"date: {row[2:5]}" for row in results_date])
                 self.ids.lbl_print1.text = f"car: {result_user[1]}, plate: {result_user[0]}"
@@ -213,9 +220,12 @@ class MainWindow(FloatLayout):
                 conn.close()
 
 
+
 class parking(App):
     def build(self):
         return MainWindow()
+
+
 
 if __name__ == "__main__":
     parking().run()
